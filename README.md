@@ -67,18 +67,36 @@ Deliverables are grouped into turnaround tiers:
 
 ---
 
-## ⚡ Automated Weekly Data Update Engine
+## 🎨 Visual Aesthetics & High-Contrast Light/Dark Themes
+
+All three dashboards feature synchronized, persistent Light and Dark themes (`ask_dash_theme` in `localStorage`):
+
+* **Sliding Navigation Bars**:
+  * **Vendor Package Bar** (`index_vendor.html`): Active package pills (e.g. *Open Drain Pump [11]*) render with a solid, vibrant blue fill (`#0284c7`) and pure white text/badge for maximum readability. Unselected pills use crisp slate text (`#334155`) with clear borders.
+  * **Technical Scope Bar** (`index.html`): Active category pills (e.g. *Part B - Engineering Doc [1,154]*) use royal blue with pure white text.
+  * **MDR Scope Bar** (`index_mdr.html`): Active work package pills use bold purple/indigo with white badges.
+* **Header Actions & Theme Toggle Placement**:
+  * Action buttons (`What is SLA?`, `Upload New File`, `Export CSV`, `Reset Filters`) feature high contrast borders and text in both dark and light modes.
+  * The light/dark mode toggle button (`#themeToggleBtn`) is positioned at the **far right as the last icon** across all dashboards, keeping primary actions unobstructed.
+
+---
+
+## ⚡ Automated Weekly Data Update & Dynamic Report Date Engine
 
 Contractors receive updated Excel log files on a weekly basis where **only the date in the filename changes** (e.g., changing from `18 Sep 26` to `25 Sep 26`).
 
 This project includes a fully automated updater that handles this seamlessly:
 
-### 1. In-Browser Drag & Drop Upload (No Code Needed!)
+### 1. Dynamic Header Report Dates
+* When `update_all.py` or sub-processors run, they automatically parse the date from the input Excel file name (or record timestamps) and write `window.TECH_REPORT_DATE`, `window.VENDOR_REPORT_DATE`, and `window.MDR_REPORT_DATE`.
+* The dashboard frontends dynamically render this value into `#headerReportDate` on load with zero manual HTML edits required.
+
+### 2. In-Browser Drag & Drop Upload (No Code Needed!)
 1. Click the **`📁 Upload New File`** button in the top navigation of any dashboard.
 2. Drag and drop your weekly Excel file (or click **`Browse Files...`**).
 3. The system automatically detects the file type (Technical Log, Vendor Log, or MDR Register), runs the Python conversion engine, updates the database, and refreshes the dashboard in real-time.
 
-### 2. Automated Python CLI Batch Updater (`update_all.py`)
+### 3. Automated Python CLI Batch Updater (`update_all.py`)
 To process all files automatically on your local machine:
 ```bash
 python update_all.py
@@ -142,6 +160,33 @@ The application includes production web server configuration ([`server.py`](file
 
 ---
 
+## 📦 Manual GitHub Update Checklist
+
+If you are updating GitHub manually (e.g. by dragging and dropping via GitHub's web interface or uploading files directly), upload the following files:
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **HTML Dashboards** | `index.html` | Technical Document Log Dashboard |
+| | `index_vendor.html` | Vendor Document Log Dashboard |
+| | `index_mdr.html` | MDR Revision Lifecycle & Pipeline Dashboard |
+| **Stylesheets** | `styles.css` | Core design system, light mode contrast, top hub nav |
+| | `styles_mdr.css` | MDR styling, TOC analysis, light/dark mode |
+| **JavaScript** | `app.js` | Technical Dashboard logic & automated report date |
+| | `app_vendor.js` | Vendor Dashboard logic & automated report date |
+| | `app_mdr.js` | MDR revision logic, working day calculations & automated date |
+| **Datasets** | `data.js` | Technical Log records + `window.TECH_REPORT_DATE` |
+| | `vendor_data.js` | Vendor Log records + `window.VENDOR_REPORT_DATE` |
+| | `mdr_data.js` | MDR records + Mon–Fri working days + `window.MDR_REPORT_DATE` |
+| | `latest_update.json` | Audit log of last processed files, dates, and execution results |
+| **Python Updaters** | `update_data.py` | Technical Log processor with date extraction |
+| | `update_vendor_data.py` | Vendor Log processor with date extraction |
+| | `update_mdr_data.py` | MDR processor with working day calculations & date extraction |
+| | `update_all.py` | Batch master CLI engine with auto-discovery |
+| **Documentation** | `README.md` | User manual & deployment guide |
+| | `hand_off_report.md` | System engineering specification & hand-off report |
+
+---
+
 ## 🛠️ File Structure
 
 ```text
@@ -189,3 +234,18 @@ When you receive new weekly reports:
      git push origin main
      ```
    * Render will automatically detect the commit and redeploy your live site in ~60 seconds!
+
+---
+
+## 🔮 Future Improvement Roadmap
+
+1. **GitHub Actions Scheduled Auto-Sync**:
+   * Configure a workflow (`.github/workflows/weekly_sync.yml`) that runs on a schedule (e.g. every Friday night).
+   * Automatically ingests new weekly Excel cut-off files from shared cloud storage (SharePoint / OneDrive), runs `update_all.py`, commits the updated `.js` datasets, and redeploys the site.
+2. **One-Click Executive PDF / Slide Deck Export**:
+   * Add a client-side export button to generate a presentation-ready PDF report containing the TOC bottleneck analysis, SLA compliance charts, and Top 10 delayed deliverables for steering committee meetings.
+3. **Automated SLA Delay Alerts**:
+   * Integrate webhook alerts (via Slack, Microsoft Teams, or Email) triggered when deliverables reach Day 8 of the 10 Working Day review window.
+4. **Historical Trend & Weekly S-Curve Comparison**:
+   * Archive weekly snapshots to render cumulative progress S-curves and track Contractor comment incorporation velocity trends week-over-week.
+

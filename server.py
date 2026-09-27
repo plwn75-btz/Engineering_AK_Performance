@@ -34,6 +34,10 @@ def vendor_page():
 def mdr_page():
     return send_from_directory(".", "index_mdr.html")
 
+@app.route("/analytics")
+def analytics_page():
+    return send_from_directory(".", "index_analytics.html")
+
 @app.route("/api/status", methods=["GET"])
 def get_status():
     """Returns the latest update timestamp and file dates."""

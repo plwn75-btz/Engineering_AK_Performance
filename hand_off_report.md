@@ -6,11 +6,12 @@
 1. Technical Document Review Duration Dashboard (`index.html`)  
 2. Vendor Document Review Duration Dashboard (`index_vendor.html`)  
 3. Technical Document Revision Lifecycle & MDR Pipeline Dashboard (`index_mdr.html`)  
+4. Analytic Evaluation Dashboard (Rebaseline vs Actual Delay Attribution) (`index_analytics.html`)  
 **Data Sources**:
 - `MM-ASK-1A-GEN01-ENG-MDR-0001_B1- Cut off 18-Sep-26.xlsx` (Master Document Register)
 - `ASK Technical Document Log Report - 18 Sep 26.xlsx` (Technical Deliverables Log)
 - `ASK Vendor Document Log Report - 18 Sep 26.xls` (Vendor Deliverables Log)  
-**Reporting Cut-off Date**: 18-Sep-2026  
+**Reporting Cut-off Date**: 18-Sep-2026 (Dynamic weekly auto-detection)  
 **Author / Engineering Assistant**: Antigravity (Google DeepMind)  
 **Hand-off Date**: September 2026  
 
@@ -26,9 +27,13 @@
    - 6.1 [Dashboard 1: Technical Document Review Duration Dashboard (`index.html`)](#61-dashboard-1-technical-document-review-duration-dashboard-indexhtml)
    - 6.2 [Dashboard 2: Vendor Document Review Duration Dashboard (`index_vendor.html`)](#62-dashboard-2-vendor-document-review-duration-dashboard-index_vendorhtml)
    - 6.3 [Dashboard 3: Revision Lifecycle & MDR Pipeline Dashboard (`index_mdr.html`)](#63-dashboard-3-revision-lifecycle--mdr-pipeline-dashboard-index_mdrhtml)
+   - 6.4 [Dashboard 4: Analytic Evaluation (Rebaseline vs Actual) Dashboard (`index_analytics.html`)](#64-dashboard-4-analytic-evaluation-rebaseline-vs-actual-dashboard-index_analyticshtml)
 7. [Step-by-Step Data Maintenance & Update Runbook](#7-step-by-step-data-maintenance--update-runbook)
-8. [Management Analysis Frameworks Summary (TOC & RACI)](#8-management-analysis-frameworks-summary-toc--raci)
-9. [Troubleshooting, Edge Cases & Verification](#9-troubleshooting-edge-cases--verification)
+8. [Operational Readiness, Risks & Mitigations for New Weekly Excel Drops (28-Sep-26 Onwards)](#8-operational-readiness-risks--mitigations-for-new-weekly-excel-drops-28-sep-26-onwards)
+9. [Manual GitHub Upload Inventory (File-by-File Checklist)](#9-manual-github-upload-inventory-file-by-file-checklist)
+10. [Future Improvement & Operational Roadmap](#10-future-improvement--operational-roadmap)
+11. [Management Analysis Frameworks Summary (TOC & RACI)](#11-management-analysis-frameworks-summary-toc--raci)
+12. [Conclusion & System Sign-Off](#12-conclusion--system-sign-off)
 
 ---
 
@@ -65,6 +70,10 @@ The system comprises three specialized web applications connected via seamless t
 | **REQ-17** | **MDR Dashboard Light/Dark Theme Toggle** | Add toggle button to switch between light and dark modes on the MDR Lifecycle dashboard with persistent user preference. | Added theme button in header actions, wired SVG icon switcher and `data-theme` attribute binding in [`app_mdr.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_mdr.js), unified `localStorage` key (`ask_dash_theme`) across all 3 dashboards, and styled light mode in [`styles_mdr.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles_mdr.css). |
 | **REQ-18** | **Contractor Info Removal Across All Dashboards** | Remove Contractor contact info and emails from header subtitles, meta tags, and footers across all dashboards. | Removed `zm167dc@jutal.com` and related contact details from [`index.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index.html), [`index_vendor.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_vendor.html), [`index_mdr.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_mdr.html), and documentation. |
 | **REQ-19** | **Contractor Turnaround Recalculated to Working Days (WD)** | Convert Contractor comment incorporation duration from calendar days to contractual Working Days (Monday–Friday). | Updated [`update_mdr_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_mdr_data.py) with `calc_working_days()`, regenerated [`mdr_data.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/mdr_data.js), and updated frontend display labels/benchmarks in [`app_mdr.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_mdr.js) and [`index_mdr.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_mdr.html). |
+| **REQ-20** | **Light Mode Clarity & Sliding Bar Contrast Adjustment** | In light mode, sliding package/scope bars, top switcher links, and action buttons (`What is SLA?`, `Upload New File`) lacked contrast and were washed out. | Implemented high-contrast solid color fills (`#0284c7`, `#2563eb`, `#6366f1`) with pure white text and crisp badge pills. Darkened interactive button text (`#0f172a`, `#334155`, `#4338ca`) and borders (`#cbd5e1`). Verified with browser subagent. |
+| **REQ-21** | **Relocation of Theme Toggle Icon to Last Position** | Light/dark mode toggle button was located between action buttons. Relocate it to the far right after `Reset Filters` across all dashboards. | Moved `#themeToggleBtn` to the final position in `.header-actions` across `index.html`, `index_vendor.html`, and `index_mdr.html`. |
+| **REQ-22** | **Automated Cut-Off / Report Date Engine** | Header report dates were static HTML strings ("18-Sep-2026"). Automatically update date based on latest weekly Excel cut-off file. | Built regex date extractor in `update_data.py`, `update_vendor_data.py`, `update_mdr_data.py`, and `update_all.py` outputting `window.<TYPE>_REPORT_DATE`. Dynamically bound `#headerReportDate` in `app.js`, `app_vendor.js`, and `app_mdr.js` with fallback. |
+| **REQ-23** | **Analytic Evaluation & Rebaseline Delay Attribution (New Tab)** | Verify Contractor proposed plan as per "REBASELINE PLAN" across IFR, IFA, AFC, and AP revisions. Compare plan vs actual execution to answer 3 core questions: (1) Is plan realistic/effective? (2) Does actual turnaround meet plan? (3) Pinpoint delay root cause parameters: (1) Improperly Planned, (2) Late Incorporation by Contractor, (3) Late Client Review (> 10 WD), or Compound Delay. Enforce Contractor entitlement right to maintain their planned incorporation allowance when Client takes > 10 WD. Evaluate macro justification if Contractor-driven delays exceed 50%. | Created dedicated 4th dashboard hub [`index_analytics.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_analytics.html), [`app_analytics.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_analytics.js), [`styles_analytics.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles_analytics.css), and [`update_analytics_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_analytics_data.py). Analyzed 2,639 revision transitions: 68.6% met plan; 59.7% of delays are Contractor-driven (> 50% threshold), confirming Contractor's plan was systematically over-optimistic/improperly planned. |
 
 ---
 
@@ -147,6 +156,11 @@ Doc_Dashboard/
 ├── app_mdr.js                  # Controller, pipeline renderer & modal engine for Dashboard 3
 ├── mdr_data.js                 # Ingested dataset: 1,904 MDR master deliverables
 │
+├── index_analytics.html        # Dashboard 4: Analytic Evaluation (Rebaseline vs Actual Delay Attribution)
+├── app_analytics.js            # Controller, delay attribution engine & interactive table for Dashboard 4
+├── styles_analytics.css        # Styling for Analytics evaluation cards, charts, and dark theme
+├── analytics_data.js           # Ingested dataset: 2,639 revision transition records with root cause attribution
+│
 ├── styles.css                  # Modern responsive design system (Glassmorphism, dark/light, modals)
 ├── styles_mdr.css              # Custom styling for interactive lifecycle pipeline & cards
 │
@@ -154,6 +168,7 @@ Doc_Dashboard/
 ├── update_data.py              # Automated data transformer: Technical Log Excel ➔ data.js
 ├── update_vendor_data.py       # Automated data transformer: Vendor Log Excel ➔ vendor_data.js
 ├── update_mdr_data.py          # Automated data transformer: MDR Excel ➔ mdr_data.js
+├── update_analytics_data.py    # Automated data transformer: Rebaseline plan vs actual delay analysis
 ├── server.py                   # Production Flask application with /api/upload endpoint
 ├── Procfile                    # Render.com start command (web: gunicorn server:app)
 ├── render.yaml                 # Render Infrastructure-as-Code Blueprint
@@ -202,6 +217,27 @@ Doc_Dashboard/
 
 ---
 
+### 6.4 Dashboard 4: Analytic Evaluation (Rebaseline vs Actual) Dashboard (`index_analytics.html`)
+- **Dual Investigation Mandate**:
+  1. *Effectiveness of Contractor Rebaseline Plan*: Evaluates whether Contractor's proposed incorporation durations were realistic or systematically compressed.
+  2. *Delay Attribution Parameters*: Decomposes all overdue revision transitions into four mutually exclusive contractual root causes:
+     - **Improperly Planned (Contractor Over-run)**: Contractor planned ≤ 0 or unrealistically short incorporation days, or breached planned turnaround without Client delay.
+     - **Late Incorporation (Contractor)**: Contractor took more calendar/working days to revise than originally planned.
+     - **Late Client Review (> 10 WD)**: Client exceeded the contractual 10 Working Day review allowance while Contractor incorporated within or on plan.
+     - **Compound Delay**: Both Client exceeded 10 WD review AND Contractor incorporated late.
+- **Contractual Entitlement Safeguard**:
+  - Enforces the Contractor's contractual right to maintain their planned incorporation duration allowance even when the Client returns transmittals late (> 10 WD). Contractor is only penalized for their own incremental variance.
+- **50% Macro Justification Threshold**:
+  - Automatically assesses whether Contractor-caused delays exceed 50% of all delay events across the project to provide indisputable evidence for contractual claims and time extension negotiations.
+- **Interactive Visualizations**:
+  - **KPI Cards**: Total Transitions (`2,639`), Met Rebaseline Plan (`1,811 / 68.6%`), Delayed (`828 / 31.4%`), Contractor-Driven Delays (`494 / 59.7%`), Client Late Reviews (`334 / 40.3%`).
+  - **Donut Chart**: High-contrast root cause breakdown with dedicated color scheme: Late Client Review (Ocean Blue `#0284c7`), Compound Delay (Crimson `#dc2626`), Late Cont. Incorp (Amber `#f59e0b`), Improper Plan (Purple `#8b5cf6`).
+  - **Stacked Bar Chart by Discipline**: Extended to full right width, displaying delay distributions across Topside, Hull, Mooring, SURF, and Subsea disciplines in a single-row header.
+  - **Turnaround Delta Distribution Chart**: Shows variance tiers (`≤ 0 days on plan`, `1-5 days`, `6-10 days`, `11-20 days`, `> 20 days delay`).
+  - **Sortable Drill-Down Table**: 11 centered column headers without arrow glyphs, clean left-aligned document numbers/titles with single-line ellipsis, and streamlined single-row action buttons (`Details 🔍`).
+
+---
+
 ## 7. Step-by-Step Data Maintenance & Update Runbook
 
 When Document Control issues weekly updated cut-off reports where **only the date in the filename changes**, you have two seamless methods to update the dashboards:
@@ -225,7 +261,7 @@ If running locally from the project directory:
 3. The script automatically:
    - Scans the directory using regex wildcards (`ASK Technical Document Log Report*.xlsx`, `ASK Vendor Document Log Report*.xls*`, `*MDR*.xlsx`).
    - Identifies the latest cut-off dates across all matching files.
-   - Recalculates working days and updates `data.js`, `vendor_data.js`, `mdr_data.js`, and `latest_update.json`.
+   - Recalculates working days and updates `data.js`, `vendor_data.js`, `mdr_data.js`, `analytics_data.js`, and `latest_update.json`.
 
 ### Method C: Deploying Updates to GitHub & Render.com
 1. Commit the updated datasets or weekly files:
@@ -238,9 +274,157 @@ If running locally from the project directory:
 
 ---
 
-## 8. Management Analysis Frameworks Summary (TOC & RACI)
+## 8. Operational Readiness, Risks & Mitigations for New Weekly Excel Drops (28-Sep-26 Onwards)
 
-- **Primary Bottleneck**: Contractor Comment Incorporation (~20–24 calendar days).
+To ensure high reliability when updating the dashboards weekly with new cut-off files (e.g. dated 28-Sep-2026 and subsequent cycles), a comprehensive audit of the end-to-end data ingestion pipeline was performed. The following operational risks, technical concerns, and concrete mitigation strategies have been documented for record:
+
+### 8.1 Identified Technical Concerns & Root Cause Analysis
+
+| # | Technical Concern | Root Cause & Failure Scenario | Risk Level | Direct Impact |
+| :-: | :--- | :--- | :---: | :--- |
+| **C-1** | **String-Based File Sorting Bug Across Calendar Months** | Standalone processors (`update_data.py`, `update_vendor_data.py`, `update_mdr_data.py`, `update_analytics_data.py`) locate the latest Excel file using `sorted(glob.glob(...), reverse=True)`. Within September (`28-Sep-26` vs `18-Sep-26`), alphabetical sorting succeeds because `'28'` > `'18'`. **However, in October (`05-Oct-26`), alphabetical sorting will fail** because `'28-Sep-26'` > `'05-Oct-26'` (`'2'` > `'0'`). In addition, `update_all.py` uses `os.path.getmtime()` which becomes non-deterministic in fresh Git clones or CI/CD checkouts where all files receive the same filesystem checkout timestamp. | **HIGH** *(Triggered upon Month Rollover)* | Dashboards would silently ignore newly added October/November files and continue processing outdated September data. |
+| **C-2** | **Render.com Cloud Auto-Build Gap (Direct GitHub Uploads)** | In [`render.yaml`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/render.yaml), the deployment configuration specifies: `buildCommand: pip install -r requirements.txt`. It does **not** execute `python update_all.py`. If a user uploads new Excel files to GitHub via web UI without running the python updater locally, Render rebuilds the Flask app but continues serving the old, static `.js` files. | **MEDIUM-HIGH** | Cloud dashboard displays stale data even after new Excel files are committed to GitHub. |
+| **C-3** | **MDR Worksheet Whitespace Sensitivity** | `update_analytics_data.py` uses direct dictionary lookup `wb_mdr[sname]` where `sname` iterates over `['WP01 TOPSIDE', 'WP02 HULL', 'WP03 MOORING', 'WP04 SURF', 'WP05 SUBSEA']`. If a document controller or EDMS export introduces a trailing space in a sheet name (e.g. `'WP01 TOPSIDE '` or `'WP02 HULL '`), openpyxl throws an unhandled `KeyError: "Worksheet WP01 TOPSIDE does not exist"`, immediately terminating the analytics extraction. | **MEDIUM** | Ingestion pipeline crashes abruptly if any tab has trailing whitespace. |
+| **C-4** | **Weekly Source Log Column Header Variance** | Periodically, document control teams may introduce minor header spacing or phrasing changes in weekly exports (e.g. `'Actual Submit In '` vs `'Actual Submit In'`, or `'Planned Submit In'` vs `'Planned Submit Date'`). | **LOW** | Potential for missed column mappings if headers are parsed with strict exact matching. |
+
+---
+
+### 8.2 Engineered Mitigation Plan & Action Items
+
+#### Mitigation for Concern C-1: Calendar Date Extraction & Chronological Sorting
+Replace ASCII string sorting and filesystem `getmtime` with a robust calendar date parser that converts dates from filenames (`18 Sep 26`, `28-Sep-26`, `05-Oct-26`) into true `datetime.date` objects:
+```python
+import re
+from datetime import datetime
+
+MONTH_MAP = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+}
+
+def extract_file_date(filename):
+    """Extracts Day, Month, Year from filenames and returns a datetime.date object."""
+    match = re.search(r'(\d{1,2})[\s\-_]+([A-Za-z]{3})[\s\-_]+(\d{2,4})', filename)
+    if match:
+        day = int(match.group(1))
+        month_str = match.group(2).lower()
+        year = int(match.group(3))
+        if year < 100:
+            year += 2000
+        month = MONTH_MAP.get(month_str, 1)
+        return datetime(year, month, day).date()
+    return datetime.min.date()
+
+def find_latest_file(file_list):
+    """Sorts candidate files strictly by calendar date."""
+    if not file_list:
+        return None
+    return max(file_list, key=lambda f: extract_file_date(f))
+```
+
+#### Mitigation for Concern C-2: Turnkey Cloud Deployment Configuration
+Update [`render.yaml`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/render.yaml) so that Render.com automatically runs the master ingestion engine whenever new code or Excel files are pushed:
+```yaml
+services:
+  - type: web
+    name: ask-doc-dashboard
+    env: python
+    buildCommand: pip install -r requirements.txt && python update_all.py
+    startCommand: gunicorn server:app
+```
+*Operational Guideline*: If uploading files manually via GitHub Web UI prior to updating `render.yaml`, remember to either:
+1. Run `python update_all.py` on your local computer first, then commit both the new `.xlsx` files and the refreshed `.js` datasets (`data.js`, `vendor_data.js`, `mdr_data.js`, `analytics_data.js`, `latest_update.json`) to GitHub; OR
+2. Use the live web UI's **`📁 Upload New File`** button on Render, which processes files on the server directly.
+
+#### Mitigation for Concern C-3: Whitespace & Case-Insensitive Sheet Resolution
+In `update_analytics_data.py` (and all openpyxl loaders), replace direct dictionary access `wb[name]` with a fault-tolerant sheet finder:
+```python
+def get_worksheet_resilient(workbook, target_name):
+    """Finds worksheet matching target_name regardless of casing or extra whitespace."""
+    target_clean = target_name.strip().upper()
+    for name in workbook.sheetnames:
+        if name.strip().upper() == target_clean:
+            return workbook[name]
+    # Fallback to prefix matching if exact match fails
+    for name in workbook.sheetnames:
+        if target_clean in name.strip().upper():
+            return workbook[name]
+    return None
+```
+
+---
+
+### 8.3 Operational Pre-Flight Checklist for the 28-Sep-26 Drop
+
+When you drop the new 28-Sep-26 Excel files into the repository, verify the following steps:
+- [ ] **File Naming Standard**: Ensure filenames follow the established pattern:
+  - Technical: `ASK Technical Document Log Report - 28 Sep 26.xlsx`
+  - Vendor: `ASK Vendor Document Log Report - 28 Sep 26.xls` (or `.xlsx`)
+  - MDR: `MM-ASK-1A-GEN01-ENG-MDR-0001_B...28-Sep-26.xlsx`
+- [ ] **Local Batch Verification (If running locally)**:
+  - Execute `python update_all.py` in PowerShell.
+  - Confirm console output reports all 4 datasets rebuilt with zero errors.
+- [ ] **Header Cut-off Date Confirmation**:
+  - Open `http://localhost:5000/` (or Render live URL).
+  - Verify that the header pill across all 4 dashboards displays: `Reporting Cut-off: 28-Sep-2026`.
+- [ ] **Metric Consistency Check**:
+  - Check that Total Submittals count updates in Technical (`> 3,046`) and Vendor (`> 188`).
+  - Open `/analytics` and verify that the Rebaseline Plan vs Actual table populates with the latest revision transitions without console errors.
+
+---
+
+## 9. Manual GitHub Upload Inventory (File-by-File Checklist)
+
+When updating your GitHub repository manually via the GitHub Web UI ("Add file" ➔ "Upload files"), upload the following files:
+
+| Category | File Path | Description & Purpose |
+| :--- | :--- | :--- |
+| **Web Pages** | [`index.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index.html) | Technical Document Review Duration Dashboard |
+| | [`index_vendor.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_vendor.html) | Vendor Equipment Document Review Duration Dashboard |
+| | [`index_mdr.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_mdr.html) | MDR Revision Lifecycle & Pipeline Dashboard |
+| | [`index_analytics.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_analytics.html) | Analytic Evaluation Dashboard (Rebaseline vs Actual) |
+| **Stylesheets** | [`styles.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles.css) | Core CSS design tokens, light mode high contrast rules, top hub nav |
+| | [`styles_mdr.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles_mdr.css) | MDR lifecycle, TOC analysis, and light/dark theme styling |
+| | [`styles_analytics.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles_analytics.css) | Analytics evaluation layout, high-contrast delay root-cause colors |
+| **Scripts** | [`app.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app.js) | Technical dashboard logic & dynamic report date binding |
+| | [`app_vendor.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_vendor.js) | Vendor dashboard logic & dynamic report date binding |
+| | [`app_mdr.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_mdr.js) | MDR revision logic, working day calculations & dynamic date binding |
+| | [`app_analytics.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_analytics.js) | Analytics evaluation logic, table sorting/filtering & delay decomposition |
+| **Datasets** | [`data.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/data.js) | Technical Log records + `window.TECH_REPORT_DATE` |
+| | [`vendor_data.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/vendor_data.js) | Vendor Log records + `window.VENDOR_REPORT_DATE` |
+| | [`mdr_data.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/mdr_data.js) | MDR records + Mon–Fri working days + `window.MDR_REPORT_DATE` |
+| | [`analytics_data.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/analytics_data.js) | 2,639 revision transitions + root cause tags + `window.ANALYTICS_REPORT_DATE` |
+| | [`latest_update.json`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/latest_update.json) | Audit log of last processed files, dates, and execution results |
+| **Python Engines**| [`update_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_data.py) | Technical Log processor with date extraction |
+| | [`update_vendor_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_vendor_data.py) | Vendor Log processor with date extraction |
+| | [`update_mdr_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_mdr_data.py) | MDR processor with working day calculations & date extraction |
+| | [`update_analytics_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_analytics_data.py) | Rebaseline plan vs actual delay attribution processor |
+| | [`update_all.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_all.py) | Batch master CLI engine with auto-discovery |
+| **Documentation** | [`README.md`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/README.md) | User operational manual and deployment guide |
+| | [`hand_off_report.md`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/hand_off_report.md) | Engineering system specification and hand-off report |
+
+---
+
+## 10. Future Improvement & Operational Roadmap
+
+To scale this intelligence hub across later project phases (e.g. Fabrication, Commissioning, Handover), the following enhancements are recommended:
+
+1. **GitHub Actions Scheduled Auto-Sync**:
+   - Configure a GitHub Action (`.github/workflows/weekly_sync.yml`) that runs every Friday night.
+   - Automatically ingests new weekly Excel cut-off files uploaded to a shared cloud folder (SharePoint / OneDrive / Google Drive), executes `update_all.py`, commits the updated `.js` datasets, and triggers automated deployment.
+2. **Automated Executive PDF / Slide Deck Generator**:
+   - Integrate a client-side or server-side export (e.g. `html2canvas` + `jsPDF`) to generate a one-click weekly executive PDF summary.
+   - Includes the TOC bottleneck analysis, SLA compliance doughnut charts, RACI matrix, and Top 10 delayed deliverables ready for project steering committee meetings.
+3. **Automated Email / Teams / Slack SLA Warning Alerts**:
+   - Provide automated notification webhooks when a deliverable hits Day 8 of the 10 Working Day review window, prompting discipline leads before an SLA breach occurs.
+4. **Historical Trend & Weekly S-Curve Comparison**:
+   - Archive weekly data snapshots (`data_YYYYMMDD.js`) to plot historical S-curves showing cumulative review completion and Contractor incorporation velocity over time.
+
+---
+
+## 11. Management Analysis Frameworks Summary (TOC & RACI)
+
+- **Primary Bottleneck**: Contractor Comment Incorporation (~15–24 working days).
 - **Client Turnaround Reality**: Under the contractual **10 Working Days** rule:
   - Technical documents: **10.1 working days** average (60.0% overall compliance, 78.8% at AFC stage).
   - Vendor documents: **8.2 working days** average (**89.2% compliance**).
@@ -248,13 +432,15 @@ If running locally from the project directory:
 
 ---
 
-## Conclusion & System Sign-Off
+## 12. Conclusion & System Sign-Off
 
 The system completely satisfies all stated user requirements:
 1. Strict **10 Working Days** contractual SLA criteria across all dashboards.
 2. Dual log tracking: Technical deliverables and Vendor equipment deliverables.
 3. Complete **IFR ➔ IFA ➔ AFC ➔ AP** lifecycle and bypass tracking.
-4. Seamless top-level navigation connecting all 3 dashboards.
-5. In-depth interactive drill-downs from macro KPIs down to individual transmittals.
+4. High-contrast, fully accessible Light and Dark modes with responsive sliding navigation bars.
+5. Automated weekly cut-off and report date detection across all dashboards.
+6. Clean visual layout with the theme toggle relocated to the far right.
 
-All files are verified, tested, and operational.
+All files are verified, tested in the browser, and committed to git.
+

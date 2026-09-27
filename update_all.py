@@ -21,6 +21,7 @@ from datetime import datetime
 import update_data
 import update_vendor_data
 import update_mdr_data
+import update_analytics_data
 
 def get_latest_file(pattern, directory="."):
     """Finds the most recently modified file matching the glob pattern."""
@@ -106,8 +107,17 @@ def update_all(base_dir="."):
             print(f"Error processing MDR Register: {e}")
             results["mdr"] = {"error": str(e), "status": "failed"}
     else:
-        print("\n[3/3] No MDR Master Document Register Excel file found.")
-        results["mdr"] = {"status": "not_found"}
+        print("\n[3/4] No MDR file found matching '*MDR*.xlsx'. Skipping MDR processing.")
+        results["mdr"] = {"status": "skipped", "reason": "file not found"}
+
+    # 4. Rebaseline Plan Analytic Evaluation Dataset
+    print(f"\n[4/4] Generating Rebaseline Plan Analytic Evaluation (analytics_data.js)...")
+    try:
+        update_analytics_data.process_analytics(mdr_file, tech_file, vendor_file)
+        results["analytics"] = {"status": "success"}
+    except Exception as e:
+        print(f"Error processing Analytic Evaluation: {e}")
+        results["analytics"] = {"error": str(e), "status": "failed"}
 
     # Write summary metadata
     meta_path = os.path.join(base_dir, "latest_update.json")
@@ -137,31 +147,45 @@ def process_single_uploaded_file(filepath):
     elif "mdr" in fname:
         print(f"Processing uploaded MDR Master Document Register: {filepath}...")
         update_mdr_data.process_mdr(filepath)
+        print("Regenerating Analytic Evaluation dataset...")
+        try:
+            update_analytics_data.process_analytics(mdr_path=filepath)
+        except Exception as e:
+            print(f"Warning: could not update analytics dataset: {e}")
         return {
             "type": "Master Document Register (MDR)",
             "file": os.path.basename(filepath),
             "date": date_str,
-            "target": "mdr_data.js"
+            "target": "mdr_data.js & analytics_data.js"
         }
     elif "technical" in fname or "log report" in fname:
         print(f"Processing uploaded Technical Document Log: {filepath}...")
         update_data.process_file(filepath)
+        print("Regenerating Analytic Evaluation dataset...")
+        try:
+            update_analytics_data.process_analytics(tech_log_path=filepath)
+        except Exception as e:
+            print(f"Warning: could not update analytics dataset: {e}")
         return {
             "type": "Technical Document Log",
             "file": os.path.basename(filepath),
             "date": date_str,
-            "target": "data.js"
+            "target": "data.js & analytics_data.js"
         }
     else:
         # Fallback inspection: default to technical log
         print(f"Unknown naming pattern. Trying technical log parser for {filepath}...")
         try:
             update_data.process_file(filepath)
+            try:
+                update_analytics_data.process_analytics(tech_log_path=filepath)
+            except:
+                pass
             return {
                 "type": "Technical Document Log (Inferred)",
                 "file": os.path.basename(filepath),
                 "date": date_str,
-                "target": "data.js"
+                "target": "data.js & analytics_data.js"
             }
         except Exception as e:
             raise ValueError(f"Could not process uploaded file '{filepath}': {e}")

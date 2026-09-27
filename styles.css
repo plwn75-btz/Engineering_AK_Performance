@@ -1390,6 +1390,13 @@ body {
   font-weight: 600;
 }
 
+.nav-tab-link.active-analytics {
+  background: rgba(139, 92, 246, 0.18);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  font-weight: 600;
+}
+
 /* ==========================================================================
    LIGHT THEME ACCESSIBILITY & CONTRAST OVERRIDES
    ========================================================================== */
@@ -1431,6 +1438,13 @@ body {
   background: #d1fae5;
   color: #065f46;
   border-color: #6ee7b7;
+  font-weight: 700;
+}
+
+[data-theme="light"] .nav-tab-link.active-analytics {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border-color: #c4b5fd;
   font-weight: 700;
 }
 
