@@ -7,6 +7,8 @@ and generates data.js for the interactive dashboard.
 """
 
 import sys
+import os
+import re
 import glob
 import json
 from pathlib import Path
@@ -92,11 +94,26 @@ def process_file(excel_path=None):
             'area': str(row['Area'] or '').strip()
         })
 
+    # Extract report date from filename or records
+    base_name = Path(excel_path).name
+    m = re.search(r'(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})', base_name)
+    if m:
+        day = m.group(1).zfill(2)
+        mon = m.group(2).capitalize()
+        yr = m.group(3)
+        if len(yr) == 2: yr = "20" + yr
+        report_date = f"{day}-{mon}-{yr}"
+    else:
+        # Fallback to latest record date
+        valid_dates = [r['actual_submit_in'] for r in records if r.get('actual_submit_in')]
+        report_date = sorted(valid_dates, reverse=True)[0] if valid_dates else "18-Sep-2026"
+
     out_path = Path("data.js")
     with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(f'window.TECH_REPORT_DATE = "{report_date}";\n')
         f.write('window.RAW_DATA = ' + json.dumps(records, ensure_ascii=False) + ';')
 
-    print(f"-> Generated {out_path} with {len(records)} records.")
+    print(f"-> Generated {out_path} with {len(records)} records (Report Date: {report_date}).")
     
     # Detailed category breakdown
     print("\n--- Document Category Breakdown ---")

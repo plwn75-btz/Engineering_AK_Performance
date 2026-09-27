@@ -1252,9 +1252,38 @@
     });
   }
 
+  function initReportDate() {
+    const dateEl = document.getElementById('headerReportDate');
+    if (!dateEl) return;
+    if (window.VENDOR_REPORT_DATE) {
+      dateEl.textContent = `Report Date: ${window.VENDOR_REPORT_DATE}`;
+      return;
+    }
+    if (state.rawData && state.rawData.length > 0) {
+      let maxDate = null;
+      for (const item of state.rawData) {
+        const dStr = item.actual_submit_out || item.actual_submit_in;
+        if (dStr) {
+          const d = new Date(dStr);
+          if (!isNaN(d.getTime()) && (!maxDate || d > maxDate)) {
+            maxDate = d;
+          }
+        }
+      }
+      if (maxDate) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const day = String(maxDate.getDate()).padStart(2, '0');
+        const mon = months[maxDate.getMonth()];
+        const yr = maxDate.getFullYear();
+        dateEl.textContent = `Report Date: ${day}-${mon}-${yr}`;
+      }
+    }
+  }
+
   // Initialize
   function init() {
     document.documentElement.setAttribute('data-theme', state.theme);
+    initReportDate();
     initDataIndex();
     setupEvents();
     applyFilters();

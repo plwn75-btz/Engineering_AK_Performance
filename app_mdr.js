@@ -24,7 +24,7 @@
     pageSize: 50,
     sortColumn: 'doc_no',
     sortDirection: 'asc',
-    theme: localStorage.getItem('ask_mdr_theme') || 'dark',
+    theme: localStorage.getItem('ask_dash_theme') || 'dark',
     selectedDoc: null
   };
 
@@ -170,23 +170,52 @@
   // --- Initialize ---
   function init() {
     setupTheme();
+    setupReportDate();
     populateDisciplineOptions();
     updateTabBadges();
     applyFilters();
     bindEvents();
   }
 
+  function setupReportDate() {
+    const dateEl = document.getElementById('headerReportDate');
+    if (!dateEl) return;
+    if (window.MDR_REPORT_DATE) {
+      dateEl.textContent = `Cut-off ${window.MDR_REPORT_DATE}`;
+    }
+  }
+
   // --- Theme Setup ---
   function setupTheme() {
     document.documentElement.setAttribute('data-theme', state.theme);
-    if (el.themeIcon) {
-      el.themeIcon.textContent = state.theme === 'light' ? '🌙' : '☀️';
+    if (!el.themeIcon) return;
+    if (state.theme === 'dark') {
+      el.themeIcon.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      `;
+    } else {
+      el.themeIcon.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      `;
     }
   }
 
   function toggleTheme() {
-    state.theme = state.theme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('ask_mdr_theme', state.theme);
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    localStorage.setItem('ask_dash_theme', state.theme);
     setupTheme();
   }
 
@@ -544,9 +573,9 @@
     const afcApList = data.filter(d => d.ap && typeof d.ap.incorp_days === 'number' && d.ap.incorp_days >= 0);
     const afcApAvgIncorp = afcApList.length > 0 ? (afcApList.reduce((s, d) => s + d.ap.incorp_days, 0) / afcApList.length).toFixed(1) : '--';
 
-    if (el.connIfrIfaDays) el.connIfrIfaDays.textContent = `${ifaAvgIncorp} d`;
-    if (el.connIfaAfcDays) el.connIfaAfcDays.textContent = `${afcAvgIncorp} d`;
-    if (el.connAfcApDays) el.connAfcApDays.textContent = `${afcApAvgIncorp} d`;
+    if (el.connIfrIfaDays) el.connIfrIfaDays.textContent = `${ifaAvgIncorp} WD`;
+    if (el.connIfaAfcDays) el.connIfaAfcDays.textContent = `${afcAvgIncorp} WD`;
+    if (el.connAfcApDays) el.connAfcApDays.textContent = `${afcApAvgIncorp} WD`;
   }
 
   function renderReturnPills(container, statusCodes) {
@@ -595,13 +624,13 @@
                        (avgIfaAfc !== '--' ? parseFloat(avgIfaAfc) : 0) +
                        (avgAfcAp !== '--' ? parseFloat(avgAfcAp) : 0);
 
-    if (el.summaryIfrIfaAvg) el.summaryIfrIfaAvg.textContent = `${avgIfrIfa} d`;
+    if (el.summaryIfrIfaAvg) el.summaryIfrIfaAvg.textContent = `${avgIfrIfa} WD`;
     if (el.summaryIfrIfaCount) el.summaryIfrIfaCount.textContent = `${ifrIfaList.length.toLocaleString()} transitions tracked`;
-    if (el.summaryIfaAfcAvg) el.summaryIfaAfcAvg.textContent = `${avgIfaAfc} d`;
+    if (el.summaryIfaAfcAvg) el.summaryIfaAfcAvg.textContent = `${avgIfaAfc} WD`;
     if (el.summaryIfaAfcCount) el.summaryIfaAfcCount.textContent = `${ifaAfcList.length.toLocaleString()} transitions tracked`;
-    if (el.summaryAfcApAvg) el.summaryAfcApAvg.textContent = `${avgAfcAp} d`;
+    if (el.summaryAfcApAvg) el.summaryAfcApAvg.textContent = `${avgAfcAp} WD`;
     if (el.summaryAfcApCount) el.summaryAfcApCount.textContent = `${afcApList.length.toLocaleString()} approvals tracked`;
-    if (el.summaryTotalCycleAvg) el.summaryTotalCycleAvg.textContent = `${totalCycle.toFixed(1)} d`;
+    if (el.summaryTotalCycleAvg) el.summaryTotalCycleAvg.textContent = `${totalCycle.toFixed(1)} WD`;
 
     // Grouping by Discipline & Category
     const discCatMap = {};
@@ -658,13 +687,13 @@
                               (afcApAvg ? parseFloat(afcApAvg) : 0);
 
       let speedClass = 'mod';
-      let speedText = 'Standard (20-35d)';
-      if (totalTurnaround > 0 && totalTurnaround <= 25) {
+      let speedText = 'Standard (15-25 WD)';
+      if (totalTurnaround > 0 && totalTurnaround <= 15) {
         speedClass = 'fast';
-        speedText = 'Fast (<= 25d)';
-      } else if (totalTurnaround > 35) {
+        speedText = 'Fast (<= 15 WD)';
+      } else if (totalTurnaround > 25) {
         speedClass = 'extended';
-        speedText = 'Extended (> 35d)';
+        speedText = 'Extended (> 25 WD)';
       }
 
       const tr = document.createElement('tr');
@@ -679,17 +708,17 @@
         </td>
         <td><strong>${item.total.toLocaleString()}</strong></td>
         <td>
-          ${ifrIfaAvg !== null ? `<strong>${ifrIfaAvg} d</strong> <span class="incorp-sample-tag">(${item.ifrIfaCount} samples)</span>` : '<span class="pending-text">-</span>'}
+          ${ifrIfaAvg !== null ? `<strong>${ifrIfaAvg} WD</strong> <span class="incorp-sample-tag">(${item.ifrIfaCount} samples)</span>` : '<span class="pending-text">-</span>'}
         </td>
         <td>
-          ${ifaAfcAvg !== null ? `<strong>${ifaAfcAvg} d</strong> <span class="incorp-sample-tag">(${item.ifaAfcCount} samples)</span>` : '<span class="pending-text">-</span>'}
+          ${ifaAfcAvg !== null ? `<strong>${ifaAfcAvg} WD</strong> <span class="incorp-sample-tag">(${item.ifaAfcCount} samples)</span>` : '<span class="pending-text">-</span>'}
         </td>
         <td>
-          ${afcApAvg !== null ? `<strong>${afcApAvg} d</strong> <span class="incorp-sample-tag">(${item.afcApCount} samples)</span>` : '<span class="pending-text">-</span>'}
+          ${afcApAvg !== null ? `<strong>${afcApAvg} WD</strong> <span class="incorp-sample-tag">(${item.afcApCount} samples)</span>` : '<span class="pending-text">-</span>'}
         </td>
         <td>
-          <strong style="color: ${totalTurnaround > 35 ? 'var(--color-over10)' : 'var(--text-primary)'};">
-            ${totalTurnaround > 0 ? totalTurnaround.toFixed(1) + ' d' : '-'}
+          <strong style="color: ${totalTurnaround > 25 ? 'var(--color-over10)' : 'var(--text-primary)'};">
+            ${totalTurnaround > 0 ? totalTurnaround.toFixed(1) + ' WD' : '-'}
           </strong>
         </td>
         <td>
@@ -1070,7 +1099,7 @@
               Contractor Comment Incorporation (${label})
             </span>
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #fb923c;">
-              ${incorpDays} Days Turnaround
+              ${incorpDays} Working Days Turnaround
             </span>
           </div>
         </div>
@@ -1383,7 +1412,7 @@
           <span class="toc-connector-arrow">&rarr;</span>
           <div class="toc-step-block constraint">
             <span class="toc-step-name">&bull; PRIMARY BOTTLENECK &bull;</span>
-            <span class="toc-step-duration" style="color: #fb923c;">${avgIfrIfa} d</span>
+            <span class="toc-step-duration" style="color: #fb923c;">${avgIfrIfa} WD</span>
             <span class="toc-step-share" style="color: #f97316; font-weight: 700;">Contractor IFA Incorp</span>
           </div>
           <span class="toc-connector-arrow">&rarr;</span>
@@ -1395,7 +1424,7 @@
           <span class="toc-connector-arrow">&rarr;</span>
           <div class="toc-step-block constraint">
             <span class="toc-step-name">&bull; SECONDARY REWORK LOOP &bull;</span>
-            <span class="toc-step-duration" style="color: #fb923c;">${avgIfaAfc} d</span>
+            <span class="toc-step-duration" style="color: #fb923c;">${avgIfaAfc} WD</span>
             <span class="toc-step-share" style="color: #f97316; font-weight: 700;">Contractor AFC Incorp</span>
           </div>
           <span class="toc-connector-arrow">&rarr;</span>

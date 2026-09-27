@@ -1,6 +1,6 @@
 # ASK Field Development Project — Document Intelligence Hub
 
-An enterprise executive dashboard suite for tracking document review durations, SLA compliance, transmittal turnaround workflows, and multi-revision lifecycles between **Contractor** (*Jutal / zm167dc@jutal.com*) and the **Client Engineering Team**.
+An enterprise executive dashboard suite for tracking document review durations, SLA compliance, transmittal turnaround workflows, and multi-revision lifecycles between **Contractor** and the **Client Engineering Team**.
 
 ---
 

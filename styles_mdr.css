@@ -2295,3 +2295,155 @@ body {
   background: rgba(56, 189, 248, 0.08);
 }
 
+/* ==========================================================================
+   Light Theme Comprehensive Overrides for MDR Dashboard
+   ========================================================================== */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --border-color: rgba(203, 213, 225, 0.7);
+  --border-focus: rgba(99, 102, 241, 0.4);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+}
+
+[data-theme="light"] body {
+  background-image: 
+    radial-gradient(circle at 5% 5%, rgba(99, 102, 241, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 95% 85%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.02) 0%, transparent 55%);
+}
+
+[data-theme="light"] .brand-title h1 {
+  background: linear-gradient(to right, #0f172a, #334155);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .dashboard-switcher {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border-color);
+}
+
+[data-theme="light"] .switch-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .switch-btn.active {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+[data-theme="light"] .theme-toggle-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .action-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .action-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] .wp-tab {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme="light"] .wp-tab:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+[data-theme="light"] .wp-tab.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+[data-theme="light"] .wp-tab.active .wp-count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .pipeline-card,
+[data-theme="light"] .milestone-col,
+[data-theme="light"] .table-card,
+[data-theme="light"] .incorp-mini-card,
+[data-theme="light"] .incorp-table-card,
+[data-theme="light"] .cat-card,
+[data-theme="light"] .filters-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .search-box input,
+[data-theme="light"] .filter-select {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .data-table th {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .data-table td {
+  border-color: #f1f5f9;
+}
+
+[data-theme="light"] .data-table tr:hover td {
+  background: #f8fafc;
+}
+
+[data-theme="light"] .toc-step-block {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .toc-step-block.constraint {
+  background: #fff7ed;
+  border-color: rgba(249, 115, 22, 0.4);
+}
+
+[data-theme="light"] .modal-container,
+[data-theme="light"] .drawer-content {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .exec-section-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .conn-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+

@@ -10,8 +10,9 @@
     "status": "success"
   },
   "mdr": {
-    "error": "module 'update_mdr_data' has no attribute 'process_mdr_file'",
-    "status": "failed"
+    "file": "MM-ASK-1A-GEN01-ENG-MDR-0001_B1- Cut off 18-Sep-26.xlsx",
+    "date": "18 Sep 26",
+    "status": "success"
   },
-  "updated_at": "2026-09-27T00:11:51.958143"
+  "updated_at": "2026-09-27T12:47:21.732246"
 }

@@ -1317,3 +1317,302 @@ body {
   }
 }
 
+/* Hub Navigation Switcher */
+.hub-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 10px 18px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hub-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.hub-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-tab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.nav-tab-link:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.nav-tab-link.active-tech {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  font-weight: 600;
+}
+
+.nav-tab-link.active-vendor {
+  background: rgba(56, 189, 248, 0.18);
+  color: #bae6fd;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  font-weight: 600;
+}
+
+.nav-tab-link.active-mdr {
+  background: rgba(16, 185, 129, 0.18);
+  color: #a7f3d0;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   LIGHT THEME ACCESSIBILITY & CONTRAST OVERRIDES
+   ========================================================================== */
+[data-theme="light"] .hub-nav {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .hub-nav-brand {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+[data-theme="light"] .nav-tab-link {
+  color: #475569;
+}
+
+[data-theme="light"] .nav-tab-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .nav-tab-link.active-tech {
+  background: #ede9fe;
+  color: #4338ca;
+  border-color: #a5b4fc;
+  font-weight: 700;
+}
+
+[data-theme="light"] .nav-tab-link.active-vendor {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #7dd3fc;
+  font-weight: 700;
+}
+
+[data-theme="light"] .nav-tab-link.active-mdr {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+  font-weight: 700;
+}
+
+[data-theme="light"] .btn-sla-info {
+  color: #4338ca;
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  font-weight: 600;
+}
+
+[data-theme="light"] .btn-sla-info:hover {
+  background: #ddd6fe;
+  color: #312e81;
+  border-color: #a78bfa;
+}
+
+[data-theme="light"] .btn-upload-nav {
+  color: #0369a1;
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  font-weight: 600;
+}
+
+[data-theme="light"] .btn-upload-nav:hover {
+  background: #bae6fd;
+  color: #075985;
+  border-color: #38bdf8;
+}
+
+[data-theme="light"] .btn-icon {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+[data-theme="light"] .btn-icon:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+[data-theme="light"] .btn-secondary {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Category & Package Sliding Bars in Light Mode */
+[data-theme="light"] .doc-category-nav {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .doc-category-nav-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+[data-theme="light"] .doc-category-tab {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+  font-weight: 600;
+}
+
+[data-theme="light"] .doc-category-tab:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] .doc-category-tab.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+[data-theme="light"] .doc-category-tab.focus-part-b.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+[data-theme="light"] .tab-badge {
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 600;
+}
+
+[data-theme="light"] .doc-category-tab.active .tab-badge {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Vendor Package Sliding Navigation */
+[data-theme="light"] .vendor-pkg-nav {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .vendor-pkg-label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .pkg-tab {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+  font-weight: 600;
+}
+
+[data-theme="light"] .pkg-tab:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] .pkg-tab.active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+[data-theme="light"] .pkg-tab-badge {
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 600;
+}
+
+[data-theme="light"] .pkg-tab.active .pkg-tab-badge {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+[data-theme="light"] .vendor-pkg-nav::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+/* Badge Tags & Filter Pills in Light Mode */
+[data-theme="light"] .badge-tag {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .pill-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .pill-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] .search-input,
+[data-theme="light"] .select-filter {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .search-input:focus,
+[data-theme="light"] .select-filter:focus {
+  border-color: #6366f1;
+  background: #ffffff;
+}

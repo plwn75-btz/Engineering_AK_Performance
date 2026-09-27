@@ -7,6 +7,7 @@ Generates: mdr_data.js for index_mdr.html
 """
 
 import os
+import re
 import sys
 import glob
 import json
@@ -139,13 +140,13 @@ def process_mdr(mdr_path=None, log_path=None):
             if not ifa_log and ifa_plan != 'N/A' and len(logs) > 1: ifa_log = logs[1]
             if not afc_log and len(logs) > 2: afc_log = logs[2]
             
-            # Contractor incorporation turnaround
+            # Contractor incorporation turnaround (Working Days: Monday to Friday)
             ifa_incorp_days = None
             if ifa_log and ifa_log['in_dt'] and ifr_log and ifr_log['out_dt']:
                 try:
                     dt_in = datetime.strptime(ifa_log['in_dt'], '%Y-%m-%d')
                     dt_out = datetime.strptime(ifr_log['out_dt'], '%Y-%m-%d')
-                    ifa_incorp_days = (dt_in - dt_out).days
+                    ifa_incorp_days = calc_working_days(dt_out.date(), dt_in.date())
                 except: pass
                 
             afc_incorp_days = None
@@ -154,10 +155,10 @@ def process_mdr(mdr_path=None, log_path=None):
                 try:
                     dt_in = datetime.strptime(afc_log['in_dt'], '%Y-%m-%d')
                     dt_out = datetime.strptime(prev_out, '%Y-%m-%d')
-                    afc_incorp_days = (dt_in - dt_out).days
+                    afc_incorp_days = calc_working_days(dt_out.date(), dt_in.date())
                 except: pass
                 
-            # AFC -> AP incorporation turnaround
+            # AFC -> AP incorporation turnaround (Working Days: Monday to Friday)
             ap_incorp_days = None
             ap_out_dt = None
             if afc_log and afc_log['out_dt']:
@@ -166,8 +167,8 @@ def process_mdr(mdr_path=None, log_path=None):
                     try:
                         dt_in = datetime.strptime(after_afc_logs[0]['in_dt'], '%Y-%m-%d')
                         dt_out = datetime.strptime(afc_log['out_dt'], '%Y-%m-%d')
-                        diff = (dt_in - dt_out).days
-                        if diff >= 0:
+                        diff = calc_working_days(dt_out.date(), dt_in.date())
+                        if diff is not None and diff >= 0:
                             ap_incorp_days = diff
                     except: pass
                     appr_log = next((l for l in after_afc_logs if 'APPR' in (l['status_code'] or '').upper()), None)
@@ -252,11 +253,24 @@ def process_mdr(mdr_path=None, log_path=None):
                 'total_revisions_logged': len(logs)
             })
 
+    # Extract cut-off date from MDR filename
+    base_name = Path(mdr_path).name
+    m = re.search(r'(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})', base_name)
+    if m:
+        day = m.group(1).zfill(2)
+        mon = m.group(2).capitalize()
+        yr = m.group(3)
+        if len(yr) == 2: yr = "20" + yr
+        report_date = f"{day}-{mon}-{yr}"
+    else:
+        report_date = "18-Sep-2026"
+
     out_file = Path('mdr_data.js')
     with open(out_file, 'w', encoding='utf-8') as f:
+        f.write(f'window.MDR_REPORT_DATE = "{report_date}";\n')
         f.write('window.MDR_DATA = ' + json.dumps(records, ensure_ascii=False) + ';')
 
-    print(f"Successfully generated {out_file} with {len(records)} records.")
+    print(f"Successfully generated {out_file} with {len(records)} records (Cut-off Date: {report_date}).")
     return True
 
 if __name__ == '__main__':

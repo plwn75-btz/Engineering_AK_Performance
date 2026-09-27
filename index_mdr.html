@@ -33,9 +33,6 @@
           MDR Revision Lifecycle Dashboard
         </a>
       </div>
-      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
-        <span id="themeIcon">☀️</span>
-      </button>
     </nav>
 
     <!-- Header -->
@@ -52,9 +49,7 @@
             <span class="badge-tag live-badge">MDR TRACKER</span>
           </div>
           <div class="brand-subtitle">
-            <span>MDR Master Document Register &bull; Cut-off 18-Sep-26</span>
-            <span class="separator">&bull;</span>
-            <span>Contractor: <strong>zm167dc@jutal.com</strong></span>
+            <span>MDR Master Document Register &bull; <span id="headerReportDate">Cut-off 18-Sep-26</span></span>
             <span class="separator">&bull;</span>
             <span id="headerTotalBadge" class="doc-count-pill">1,904 Documents</span>
           </div>
@@ -79,6 +74,21 @@
         <button class="action-btn primary" id="refreshBtn" title="Reset all filters">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
           Reset Filters
+        </button>
+        <button id="themeToggleBtn" class="action-btn theme-toggle-btn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; min-width: 40px;">
+          <span id="themeIcon" style="display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </span>
         </button>
       </div>
     </header>
@@ -232,7 +242,7 @@
       <div class="kpi-card highlight-orange" id="kpiContractorIncorpCard">
         <div class="kpi-header">
           <div class="kpi-title-with-role">
-            <span class="kpi-title">AVG CONTRACTOR INCORPORATION</span>
+            <span class="kpi-title">AVG CONTRACTOR INCORPORATION (WD)</span>
             <span class="kpi-role-tag contractor-tag">Contractor Role</span>
           </div>
           <div class="kpi-icon orange">
@@ -240,8 +250,8 @@
           </div>
         </div>
         <div class="kpi-value-row">
-          <span class="kpi-value" id="kpiAvgContractorDays">22</span>
-          <span class="kpi-unit">days</span>
+          <span class="kpi-value" id="kpiAvgContractorDays">--</span>
+          <span class="kpi-unit">Working Days</span>
           <span class="kpi-badge warning">Incorp Comments</span>
         </div>
         <div class="kpi-footer">
@@ -501,7 +511,7 @@
             <span class="badge-tag" style="background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3);">STAGE TURNAROUND MATRIX</span>
           </div>
           <h2 class="section-heading">Contractor Comment Incorporation Duration by Discipline</h2>
-          <p class="section-subtext">Average days taken by Contractor (<strong>zm167dc@jutal.com</strong>) to incorporate Client comments on each revision stage (IFR &rarr; IFA, IFA &rarr; AFC, AFC &rarr; AP) for <strong>Part B (Eng. Doc)</strong> and <strong>Part C (Eng. Drawing)</strong></p>
+          <p class="section-subtext">Average working days taken by Contractor to incorporate Client comments on each revision stage (IFR &rarr; IFA, IFA &rarr; AFC, AFC &rarr; AP) for <strong>Part B (Eng. Doc)</strong> and <strong>Part C (Eng. Drawing)</strong></p>
         </div>
         <div class="category-toggle-group" id="categoryToggleGroup">
           <button class="cat-toggle-btn active" data-category="ALL">All Categories (<span id="catCountAll">1,904</span>)</button>
@@ -514,22 +524,22 @@
       <div class="incorp-summary-row" id="incorpSummaryRow">
         <div class="incorp-mini-card">
           <span class="incorp-mini-lbl">IFR &rarr; IFA Avg Turnaround</span>
-          <span class="incorp-mini-val" id="summaryIfrIfaAvg">28.7 d</span>
-          <span class="incorp-mini-sub" id="summaryIfrIfaCount">1,029 transitions tracked</span>
+          <span class="incorp-mini-val" id="summaryIfrIfaAvg">-- WD</span>
+          <span class="incorp-mini-sub" id="summaryIfrIfaCount">transitions tracked</span>
         </div>
         <div class="incorp-mini-card">
           <span class="incorp-mini-lbl">IFA &rarr; AFC Avg Turnaround</span>
-          <span class="incorp-mini-val" id="summaryIfaAfcAvg">25.4 d</span>
-          <span class="incorp-mini-sub" id="summaryIfaAfcCount">834 transitions tracked</span>
+          <span class="incorp-mini-val" id="summaryIfaAfcAvg">-- WD</span>
+          <span class="incorp-mini-sub" id="summaryIfaAfcCount">transitions tracked</span>
         </div>
         <div class="incorp-mini-card highlight-blue">
           <span class="incorp-mini-lbl">AFC &rarr; AP Avg Turnaround</span>
-          <span class="incorp-mini-val" id="summaryAfcApAvg">5.0 d</span>
-          <span class="incorp-mini-sub" id="summaryAfcApCount">610 approvals tracked</span>
+          <span class="incorp-mini-val" id="summaryAfcApAvg">-- WD</span>
+          <span class="incorp-mini-sub" id="summaryAfcApCount">approvals tracked</span>
         </div>
         <div class="incorp-mini-card highlight-brand">
           <span class="incorp-mini-lbl">Total Contractor Incorporation Cycle</span>
-          <span class="incorp-mini-val" id="summaryTotalCycleAvg">59.1 d</span>
+          <span class="incorp-mini-val" id="summaryTotalCycleAvg">-- WD</span>
           <span class="incorp-mini-sub">From 1st return to AP</span>
         </div>
       </div>
@@ -542,10 +552,10 @@
                 <th>Discipline</th>
                 <th>Category</th>
                 <th>Total Docs</th>
-                <th>IFR &rarr; IFA Avg Incorp</th>
-                <th>IFA &rarr; AFC Avg Incorp</th>
-                <th>AFC &rarr; AP Avg Incorp</th>
-                <th>Total Incorp Turnaround</th>
+                <th>IFR &rarr; IFA Avg Incorp (WD)</th>
+                <th>IFA &rarr; AFC Avg Incorp (WD)</th>
+                <th>AFC &rarr; AP Avg Incorp (WD)</th>
+                <th>Total Incorp Turnaround (WD)</th>
                 <th>Speed Benchmark</th>
               </tr>
             </thead>
@@ -633,7 +643,7 @@
             <div class="modal-icon-badge">📊</div>
             <div>
               <h2 class="modal-title">Executive Engineering Performance Analysis</h2>
-              <p class="modal-subtitle">Joint Evaluation of Contractor (Jutal) &amp; Client (ASK Project) via TOC, SLA, Pareto &amp; RACI</p>
+              <p class="modal-subtitle">Joint Evaluation of Contractor &amp; Client (ASK Project) via TOC, SLA, Pareto &amp; RACI</p>
             </div>
           </div>
           <button class="modal-close-btn" id="closeExecSummaryBtn">&times;</button>
