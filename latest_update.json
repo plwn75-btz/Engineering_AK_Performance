@@ -1,0 +1,17 @@
+{
+  "technical": {
+    "file": "ASK Technical Document Log Report - 18 Sep 26.xlsx",
+    "date": "18 Sep 26",
+    "status": "success"
+  },
+  "vendor": {
+    "file": "ASK Vendor Document Log Report - 18 Sep 26.xls",
+    "date": "18 Sep 26",
+    "status": "success"
+  },
+  "mdr": {
+    "error": "module 'update_mdr_data' has no attribute 'process_mdr_file'",
+    "status": "failed"
+  },
+  "updated_at": "2026-09-27T00:11:51.958143"
+}
