@@ -57,6 +57,8 @@
     // Executive Statement Banner
     macroVerdictBadge: document.getElementById('macroVerdictBadge'),
     macroStatementText: document.getElementById('macroStatementText'),
+    wowTrendStatement: document.getElementById('wowTrendStatement'),
+    wowTrendText: document.getElementById('wowTrendText'),
     qa1Answer: document.getElementById('qa1Answer'),
     qa2Answer: document.getElementById('qa2Answer'),
     qa3Answer: document.getElementById('qa3Answer'),
@@ -64,15 +66,21 @@
     // KPIs
     kpiTotalEval: document.getElementById('kpiTotalEval'),
     kpiScopeTag: document.getElementById('kpiScopeTag'),
+    kpiWowTotal: document.getElementById('kpiWowTotal'),
     kpiMetPlanCount: document.getElementById('kpiMetPlanCount'),
     kpiMetPlanRate: document.getElementById('kpiMetPlanRate'),
+    kpiWowMet: document.getElementById('kpiWowMet'),
     kpiOverdueCount: document.getElementById('kpiOverdueCount'),
     kpiOverdueRate: document.getElementById('kpiOverdueRate'),
+    kpiWowOverdue: document.getElementById('kpiWowOverdue'),
     kpiClientSlaRate: document.getElementById('kpiClientSlaRate'),
     kpiAvgClientWd: document.getElementById('kpiAvgClientWd'),
+    kpiWowClient: document.getElementById('kpiWowClient'),
     kpiAvgContIncWd: document.getElementById('kpiAvgContIncWd'),
     kpiAvgPlanIncWd: document.getElementById('kpiAvgPlanIncWd'),
+    kpiWowIncorp: document.getElementById('kpiWowIncorp'),
     kpiContOverrunPct: document.getElementById('kpiContOverrunPct'),
+    kpiWowOverrun: document.getElementById('kpiWowOverrun'),
 
     // Work Package Tabs
     wpTabsContainer: document.getElementById('wpTabsContainer'),
@@ -152,6 +160,17 @@
     if (window.ANALYTICS_REPORT_DATE && el.headerReportDate) {
       el.headerReportDate.textContent = `Cut-off ${window.ANALYTICS_REPORT_DATE}`;
     }
+
+    // Explicitly set default filters
+    if (el.transitionSelect) el.transitionSelect.value = 'ALL';
+    if (el.causeSelect) el.causeSelect.value = 'ALL';
+    if (el.disciplineSelect) el.disciplineSelect.value = 'ALL';
+    if (el.searchInput) el.searchInput.value = '';
+    state.selectedTransition = 'ALL';
+    state.selectedCause = 'ALL';
+    state.selectedDiscipline = 'ALL';
+    state.selectedWorkPackage = 'ALL';
+    state.selectedChip = 'ALL';
 
     populateDisciplineDropdown();
     updateTabCounts();
@@ -364,6 +383,67 @@
 
     if (el.chartAttributionCount) {
       el.chartAttributionCount.textContent = `${overdueList.length.toLocaleString()} Delays`;
+    }
+
+    // Week-over-Week Reference Notes and Trend Statement
+    const prevSum = window.ANALYTICS_PREV_SUMMARY;
+    const wowDiff = window.ANALYTICS_WOW_DIFF;
+    const prevDate = window.ANALYTICS_PREV_REPORT_DATE;
+
+    if (wowDiff && el.wowTrendText) {
+      el.wowTrendText.innerHTML = wowDiff.statement;
+      if (el.wowTrendStatement) el.wowTrendStatement.style.display = 'flex';
+    } else if (el.wowTrendStatement) {
+      el.wowTrendStatement.style.display = 'none';
+    }
+
+    if (prevSum) {
+      const pTotal = prevSum.total_evaluated_transitions || 0;
+      const dTotal = total - pTotal;
+      const signTotal = dTotal >= 0 ? `+${dTotal}` : `${dTotal}`;
+      if (el.kpiWowTotal) {
+        el.kpiWowTotal.innerHTML = `Prev (${prevDate || 'Last Week'}): ${pTotal.toLocaleString()} (<span class="${dTotal >= 0 ? 'trend-pos' : 'trend-neg'}">${signTotal}</span>)`;
+      }
+
+      const pMetPct = prevSum.met_plan_pct !== undefined ? prevSum.met_plan_pct : 0;
+      const curMetPct = total > 0 ? parseFloat((metList.length / total * 100).toFixed(1)) : 0;
+      const dMetPct = (curMetPct - pMetPct).toFixed(1);
+      const signMetPct = dMetPct >= 0 ? `+${dMetPct}%` : `${dMetPct}%`;
+      if (el.kpiWowMet) {
+        el.kpiWowMet.innerHTML = `Prev: ${pMetPct}% (${(prevSum.met_plan_count || 0).toLocaleString()}) &bull; <span class="${dMetPct >= 0 ? 'trend-pos' : 'trend-neg'}">${signMetPct}</span>`;
+      }
+
+      const pOverduePct = prevSum.overdue_pct !== undefined ? prevSum.overdue_pct : 0;
+      const curOverduePct = total > 0 ? parseFloat((overdueList.length / total * 100).toFixed(1)) : 0;
+      const dOverduePct = (curOverduePct - pOverduePct).toFixed(1);
+      const signOverduePct = dOverduePct >= 0 ? `+${dOverduePct}%` : `${dOverduePct}%`;
+      if (el.kpiWowOverdue) {
+        el.kpiWowOverdue.innerHTML = `Prev: ${pOverduePct}% (${(prevSum.overdue_count || 0).toLocaleString()}) &bull; <span class="${dOverduePct <= 0 ? 'trend-pos' : 'trend-neg'}">${signOverduePct}</span>`;
+      }
+
+      const pSla = prevSum.client_sla_compliance_rate !== undefined ? prevSum.client_sla_compliance_rate : 0;
+      const curSla = parseFloat(clientSlaRate);
+      const dSla = (curSla - pSla).toFixed(1);
+      const signSla = dSla >= 0 ? `+${dSla}%` : `${dSla}%`;
+      if (el.kpiWowClient) {
+        el.kpiWowClient.innerHTML = `Prev: ${pSla}% (${prevSum.avg_client_rev_wd} WD) &bull; <span class="${dSla >= 0 ? 'trend-pos' : 'trend-neg'}">${signSla}</span>`;
+      }
+
+      const pIncorp = prevSum.avg_cont_inc_wd !== undefined ? prevSum.avg_cont_inc_wd : 0;
+      const curIncorp = parseFloat(avgContIncWd);
+      const dIncorp = (curIncorp - pIncorp).toFixed(1);
+      const signIncorp = dIncorp >= 0 ? `+${dIncorp} WD` : `${dIncorp} WD`;
+      if (el.kpiWowIncorp) {
+        el.kpiWowIncorp.innerHTML = `Prev: ${pIncorp} WD &bull; <span class="${dIncorp <= 0 ? 'trend-pos' : 'trend-warn'}">${signIncorp}</span>`;
+      }
+
+      const pOverrun = prevSum.contractor_overrun_pct !== undefined ? prevSum.contractor_overrun_pct : 0;
+      const curOverrun = parseFloat(contOverrunPct);
+      const dOverrun = (curOverrun - pOverrun).toFixed(1);
+      const signOverrun = dOverrun >= 0 ? `+${dOverrun}%` : `${dOverrun}%`;
+      if (el.kpiWowOverrun) {
+        el.kpiWowOverrun.innerHTML = `Prev: ${pOverrun}% &bull; <span class="${dOverrun <= 0 ? 'trend-pos' : 'trend-warn'}">${signOverrun}</span>`;
+      }
     }
   }
 

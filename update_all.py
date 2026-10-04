@@ -23,21 +23,37 @@ import update_vendor_data
 import update_mdr_data
 import update_analytics_data
 
+MONTH_MAP = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+}
+
+def extract_file_date_obj(filename):
+    """Extracts Day, Month, Year from filename and returns a datetime.date object."""
+    match = re.search(r'(\d{1,2})[\s\-_]+([A-Za-z]{3})[\s\-_]+(\d{2,4})', filename)
+    if match:
+        day = int(match.group(1))
+        month_str = match.group(2).lower()
+        year = int(match.group(3))
+        if year < 100: year += 2000
+        month = MONTH_MAP.get(month_str, 1)
+        from datetime import date
+        return date(year, month, day)
+    from datetime import date
+    return date.min
+
 def get_latest_file(pattern, directory="."):
-    """Finds the most recently modified file matching the glob pattern."""
+    """Finds the newest weekly file matching the pattern based strictly on calendar date."""
     files = glob.glob(os.path.join(directory, pattern))
-    # Exclude temporary Excel lock files starting with ~$
     valid_files = [f for f in files if not os.path.basename(f).startswith("~$")]
     if not valid_files:
         return None
-    # Sort by modification time descending
-    valid_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    valid_files.sort(key=lambda x: extract_file_date_obj(os.path.basename(x)), reverse=True)
     return valid_files[0]
 
 def extract_date_from_filename(filename):
     """Attempts to extract a human-readable date string from the filename."""
     base = os.path.basename(filename)
-    # Match patterns like "18 Sep 26" or "18-Sep-26" or "2026-09-18"
     m = re.search(r'(\d{1,2}[-\s][A-Za-z]{3}[-\s]\d{2,4})', base)
     if m:
         return m.group(1).replace('-', ' ')

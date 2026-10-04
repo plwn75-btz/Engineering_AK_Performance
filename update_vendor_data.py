@@ -29,12 +29,31 @@ def calc_working_days(d1, d2):
         cur += timedelta(days=1)
     return work_days
 
+MONTH_MAP = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+}
+
+def extract_file_date_obj(filename):
+    match = re.search(r'(\d{1,2})[\s\-_]+([A-Za-z]{3})[\s\-_]+(\d{2,4})', filename)
+    if match:
+        day = int(match.group(1))
+        month_str = match.group(2).lower()
+        year = int(match.group(3))
+        if year < 100: year += 2000
+        month = MONTH_MAP.get(month_str, 1)
+        from datetime import date
+        return date(year, month, day)
+    from datetime import date
+    return date.min
+
 def process_vendor_file(excel_path=None):
     if not excel_path:
-        files = sorted(glob.glob("ASK Vendor Document Log Report*.xls*"), reverse=True)
+        files = [f for f in glob.glob("ASK Vendor Document Log Report*.xls*") if not os.path.basename(f).startswith("~$")]
         if not files:
             print("Error: No 'ASK Vendor Document Log Report' Excel file found in current folder.")
             return False
+        files.sort(key=lambda x: extract_file_date_obj(os.path.basename(x)), reverse=True)
         excel_path = files[0]
 
     print(f"Loading Vendor Report: {excel_path}...")

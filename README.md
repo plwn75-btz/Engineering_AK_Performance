@@ -6,7 +6,7 @@ An enterprise executive dashboard suite for tracking document review durations, 
 
 ## 🌟 Dashboard Architecture Overview
 
-The system consists of three interconnected, high-performance dashboards:
+The system consists of four interconnected, high-performance dashboards:
 
 1. **[Technical Document Log Dashboard (`index.html`)](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index.html)**
    * **Source Data:** `ASK Technical Document Log Report - <DATE>.xlsx` (~1,822 submissions).
@@ -26,6 +26,15 @@ The system consists of three interconnected, high-performance dashboards:
      * **AFC** (Approved for Construction — Rev 0)
      * **AP** (Approved / Close-out)
    * **Analytics:** Contractor comment incorporation turnaround vs Client review durations, TOC constraint bottleneck analysis, RACI accountability matrix, and executive management summaries.
+
+4. **[Analytic Evaluation: Rebaseline vs Actual Dashboard (`index_analytics.html`)](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_analytics.html)**
+   * **Source Data:** Ingestion of current & prior cut-offs of `MDR` and `Technical Log`.
+   * **Scope:** Rebaseline Plan vs Actual execution across all 4 revision corridors (`IFR ➔ IFA`, `IFA ➔ AFC`, `IFR ➔ AFC Fast-Track`, `AFC ➔ AP`).
+   * **Analytics:** 
+     * Delay root cause attribution: (1) Improperly Planned, (2) Late Contractor Incorporation, (3) Late Client Review (> 10 WD), or (4) Compound Delay.
+     * Contractor entitlement protection for incorporation duration when Client exceeds 10 WD.
+     * Macro delay justification tracking against the contractual 50% threshold.
+     * Week-over-Week trend comparison statement & compact reference micro-notes on all 6 KPI cards.
 
 ---
 
@@ -81,22 +90,33 @@ All three dashboards feature synchronized, persistent Light and Dark themes (`as
 
 ---
 
-## ⚡ Automated Weekly Data Update & Dynamic Report Date Engine
+## ⚡ Automated Weekly Data Update & Dynamic Multi-Week Engine
 
-Contractors receive updated Excel log files on a weekly basis where **only the date in the filename changes** (e.g., changing from `18 Sep 26` to `25 Sep 26`).
+Contractors and document control submit updated Excel logs on a weekly basis where **new files are uploaded into GitHub without removing historical past-week files** (e.g., `18 Sep 26`, `25 Sep 26`, `02 Oct 26`).
 
-This project includes a fully automated updater that handles this seamlessly:
+This project includes a fully automated engine built for zero-maintenance weekly uploads:
 
-### 1. Dynamic Header Report Dates
-* When `update_all.py` or sub-processors run, they automatically parse the date from the input Excel file name (or record timestamps) and write `window.TECH_REPORT_DATE`, `window.VENDOR_REPORT_DATE`, and `window.MDR_REPORT_DATE`.
+### 1. Multi-Week Retention & Calendar Date Auto-Detection
+* **True Calendar Date Parsing (`extract_file_date_obj`):** Replaces simple alphabetical string matching with calendar-aware parsing (`DD-Mmm-YY`).
+* **Active vs. Reference Baseline:**
+  * **Current Active Week:** Automatically identified as the file with the newest calendar date.
+  * **Previous Reference Week:** Automatically identified as the file with the second-newest calendar date, automatically feeding the Week-over-Week trend metrics.
+* **No File Deletions Required:** Past Excel files can remain safely in GitHub indefinitely.
+
+### 2. Dynamic MDR Column Header Mapping (`map_revision_columns`)
+* External teams may insert or delete columns between weekly releases (such as inserting a `FORECAST` column).
+* The parser scans header rows dynamically to map parent revisions (`IFR`, `IFA`, `AFC`, `AP`) and sub-fields (`REBASELINE PLAN`, `ACTUAL`, `RETURN STATUS`), preventing column-offset drift and broken views.
+
+### 3. Dynamic Header Report Dates
+* When `update_all.py` or sub-processors run, they automatically parse the date from the input Excel file name (or record timestamps) and write `window.TECH_REPORT_DATE`, `window.VENDOR_REPORT_DATE`, `window.MDR_REPORT_DATE`, and `window.ANALYTICS_DATA.report_date`.
 * The dashboard frontends dynamically render this value into `#headerReportDate` on load with zero manual HTML edits required.
 
-### 2. In-Browser Drag & Drop Upload (No Code Needed!)
+### 4. In-Browser Drag & Drop Upload (No Code Needed!)
 1. Click the **`📁 Upload New File`** button in the top navigation of any dashboard.
 2. Drag and drop your weekly Excel file (or click **`Browse Files...`**).
 3. The system automatically detects the file type (Technical Log, Vendor Log, or MDR Register), runs the Python conversion engine, updates the database, and refreshes the dashboard in real-time.
 
-### 3. Automated Python CLI Batch Updater (`update_all.py`)
+### 5. Automated Python CLI Batch Updater (`update_all.py`)
 To process all files automatically on your local machine:
 ```bash
 python update_all.py
@@ -104,7 +124,8 @@ python update_all.py
 * **Auto-Discovery:** Scans the folder using wildcards (`ASK Technical Document Log Report*.xlsx`, `ASK Vendor Document Log Report*.xls*`, and `*MDR*.xlsx`).
 * **Latest Date Detection:** Compares dates across matching files and selects the newest cut-off report automatically.
 * **Recalculation:** Recalculates all working-day turnaround times excluding weekends.
-* **Outputs Generated:** Updates `data.js`, `vendor_data.js`, `mdr_data.js`, and creates `latest_update.json`.
+* **Outputs Generated:** Updates `data.js`, `vendor_data.js`, `mdr_data.js`, `analytics_data.js`, and creates `latest_update.json`.
+
 
 ---
 

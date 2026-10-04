@@ -27,19 +27,61 @@ def calc_working_days(d1, d2):
         cur += timedelta(days=1)
     return work_days
 
+MONTH_MAP = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+}
+
+def extract_file_date_obj(filename):
+    match = re.search(r'(\d{1,2})[\s\-_]+([A-Za-z]{3})[\s\-_]+(\d{2,4})', filename)
+    if match:
+        day = int(match.group(1))
+        month_str = match.group(2).lower()
+        year = int(match.group(3))
+        if year < 100: year += 2000
+        month = MONTH_MAP.get(month_str, 1)
+        return date(year, month, day)
+    return date.min
+
+def map_revision_columns(sheet, is_mr_tbe=False):
+    rev_row = 10 if is_mr_tbe else 12
+    sub_row = 11 if is_mr_tbe else 13
+    current_rev = None
+    col_map = {}
+    for c in range(1, min(sheet.max_column + 1, 70)):
+        r_val = sheet.cell(row=rev_row, column=c).value
+        s_val = sheet.cell(row=sub_row, column=c).value
+        if r_val:
+            r_str = str(r_val).strip().upper()
+            for cand in ['IFR', 'IFA', 'AFC', 'AP']:
+                if cand in r_str:
+                    current_rev = cand
+                    break
+        if s_val and current_rev:
+            s_str = str(s_val).strip().upper().replace('\n', ' ')
+            if 'REBASELINE' in s_str:
+                col_key = f"{current_rev}_REB"
+                if col_key not in col_map: col_map[col_key] = c
+            elif 'PLAN' in s_str and 'REBASELINE' not in s_str:
+                col_key = f"{current_rev}_PLAN"
+                if col_key not in col_map: col_map[col_key] = c
+    return col_map
+
 def process_mdr(mdr_path=None, log_path=None):
     if not mdr_path:
-        files = sorted([f for f in glob.glob("*MDR*.xlsx") if not os.path.basename(f).startswith("~$")], reverse=True)
+        files = [f for f in glob.glob("*MDR*.xlsx") if not os.path.basename(f).startswith("~$")]
         if not files:
             print("Error: No MDR Excel file found.")
             return False
+        files.sort(key=lambda x: extract_file_date_obj(os.path.basename(x)), reverse=True)
         mdr_path = files[0]
 
     if not log_path:
-        files = sorted([f for f in glob.glob("ASK Technical Document Log Report*.xlsx") if not os.path.basename(f).startswith("~$")], reverse=True)
+        files = [f for f in glob.glob("ASK Technical Document Log Report*.xlsx") if not os.path.basename(f).startswith("~$")]
         if not files:
             print("Error: No Technical Document Log Excel file found.")
             return False
+        files.sort(key=lambda x: extract_file_date_obj(os.path.basename(x)), reverse=True)
         log_path = files[0]
 
     print(f"Loading Log Report: {log_path}...")
@@ -108,9 +150,17 @@ def process_mdr(mdr_path=None, log_path=None):
 
     records = []
     for sname in sheets:
+        if sname not in wb_mdr.sheetnames: continue
         sheet = wb_mdr[sname]
-        header_row = 11 if sname == 'PRO.ENGINEERING_MR TBE' else 13
+        is_mr_tbe = (sname == 'PRO.ENGINEERING_MR TBE')
+        header_row = 11 if is_mr_tbe else 13
+        col_map = map_revision_columns(sheet, is_mr_tbe=is_mr_tbe)
         
+        ifr_col = col_map.get('IFR_REB') or col_map.get('IFR_PLAN')
+        ifa_col = col_map.get('IFA_REB') or col_map.get('IFA_PLAN')
+        afc_col = col_map.get('AFC_REB') or col_map.get('AFC_PLAN')
+        ap_col = col_map.get('AP_REB') or col_map.get('AP_PLAN')
+
         for r in range(header_row + 1, sheet.max_row + 1):
             doc_no_val = sheet.cell(row=r, column=9).value
             if not doc_no_val: continue
@@ -123,11 +173,11 @@ def process_mdr(mdr_path=None, log_path=None):
             doc_type = str(sheet.cell(row=r, column=5).value or '').strip()
             doc_class = str(sheet.cell(row=r, column=11).value or '').strip()
             
-            ifr_plan = parse_date_val(sheet.cell(row=r, column=23).value)
-            ifa_plan = parse_date_val(sheet.cell(row=r, column=29).value)
-            afc_plan = parse_date_val(sheet.cell(row=r, column=35).value)
-            ap_plan = parse_date_val(sheet.cell(row=r, column=40).value)
-            ap_code = str(sheet.cell(row=r, column=42).value or '').strip()
+            ifr_plan = parse_date_val(sheet.cell(row=r, column=ifr_col).value) if ifr_col else None
+            ifa_plan = parse_date_val(sheet.cell(row=r, column=ifa_col).value) if ifa_col else None
+            afc_plan = parse_date_val(sheet.cell(row=r, column=afc_col).value) if afc_col else None
+            ap_plan = parse_date_val(sheet.cell(row=r, column=ap_col).value) if ap_col else None
+            ap_code = str(sheet.cell(row=r, column=ap_col + 2).value or '').strip() if ap_col else ''
             
             logs = doc_log_map.get(doc_no, [])
             logs.sort(key=lambda x: x['in_dt'] or '9999-99-99')

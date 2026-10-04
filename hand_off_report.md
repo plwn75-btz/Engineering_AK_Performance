@@ -74,6 +74,9 @@ The system comprises three specialized web applications connected via seamless t
 | **REQ-21** | **Relocation of Theme Toggle Icon to Last Position** | Light/dark mode toggle button was located between action buttons. Relocate it to the far right after `Reset Filters` across all dashboards. | Moved `#themeToggleBtn` to the final position in `.header-actions` across `index.html`, `index_vendor.html`, and `index_mdr.html`. |
 | **REQ-22** | **Automated Cut-Off / Report Date Engine** | Header report dates were static HTML strings ("18-Sep-2026"). Automatically update date based on latest weekly Excel cut-off file. | Built regex date extractor in `update_data.py`, `update_vendor_data.py`, `update_mdr_data.py`, and `update_all.py` outputting `window.<TYPE>_REPORT_DATE`. Dynamically bound `#headerReportDate` in `app.js`, `app_vendor.js`, and `app_mdr.js` with fallback. |
 | **REQ-23** | **Analytic Evaluation & Rebaseline Delay Attribution (New Tab)** | Verify Contractor proposed plan as per "REBASELINE PLAN" across IFR, IFA, AFC, and AP revisions. Compare plan vs actual execution to answer 3 core questions: (1) Is plan realistic/effective? (2) Does actual turnaround meet plan? (3) Pinpoint delay root cause parameters: (1) Improperly Planned, (2) Late Incorporation by Contractor, (3) Late Client Review (> 10 WD), or Compound Delay. Enforce Contractor entitlement right to maintain their planned incorporation allowance when Client takes > 10 WD. Evaluate macro justification if Contractor-driven delays exceed 50%. | Created dedicated 4th dashboard hub [`index_analytics.html`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/index_analytics.html), [`app_analytics.js`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/app_analytics.js), [`styles_analytics.css`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/styles_analytics.css), and [`update_analytics_data.py`](file:///c:/Users/pipes/OneDrive/Documents/Google_AntiGravity/Project/Doc_Dashboard/update_analytics_data.py). Analyzed 2,639 revision transitions: 68.6% met plan; 59.7% of delays are Contractor-driven (> 50% threshold), confirming Contractor's plan was systematically over-optimistic/improperly planned. |
+| **REQ-24** | **Dynamic MDR Column Mapping & Multi-Week File Ingestion Engine** | Handle weekly Excel files uploaded to GitHub without deleting past weeks' files. Implemented calendar-date sorting (`extract_file_date_obj`), resilient column mapping (`map_revision_columns`) to handle document control schema variations (such as `FORECAST` column insertions), and added Week-over-Week trend comparison statements with compact KPI micro-reference notes. | Updated `update_all.py`, `update_analytics_data.py`, `update_mdr_data.py`, `update_data.py`, and `update_vendor_data.py` with real calendar parsing. Automated dual-week comparison (current cut-off vs previous cut-off) generating dynamic WoW statement and micro-notes on all 6 KPI cards with zero layout height expansion. |
+| **REQ-25** | **Revision Transition Stage Chart Default to "All Revision Transitions"** | Fix blank revision stages on initial page load and set "All Revision Transitions" as default view. | Updated initial state in `app_analytics.js` and `index_analytics.html` to default to "All Revision Transitions", dynamically rendering all 4 revision corridors (`IFR -> IFA`, `IFA -> AFC`, `IFR -> AFC Fast-Track`, `AFC -> AP`) simultaneously on initial dashboard load. |
+
 
 ---
 
@@ -351,6 +354,33 @@ def get_worksheet_resilient(workbook, target_name):
             return workbook[name]
     return None
 ```
+
+#### Mitigation for Concern C-4: Multi-Week File Retention & Calendar Date Auto-Detection
+As Excel files are uploaded to GitHub week-by-week without removing past weeks' files, alphabetical string sorting fails when crossing month boundaries (e.g. `02-Oct` vs `25-Sep`). All ingestion scripts (`update_all.py`, `update_data.py`, `update_vendor_data.py`, `update_mdr_data.py`, `update_analytics_data.py`) now implement real calendar date parsing:
+```python
+def extract_file_date_obj(filename):
+    """Extracts date object from filenames like '... 25 Sep 26' or '... Cut off 25-Sep-26'."""
+    m = re.search(r'(\d{1,2})[-_\s]([A-Za-z]{3})[-_\s](\d{2,4})', filename)
+    if m:
+        day = int(m.group(1))
+        mon = m.group(2).capitalize()
+        yr = int(m.group(3))
+        if yr < 100: yr += 2000
+        return datetime.strptime(f"{day:02d}-{mon}-{yr}", "%d-%b-%Y")
+    return datetime.min
+```
+* **Active Cut-off**: The file with the latest calendar date is automatically selected as the current reporting cut-off.
+* **Historical Reference**: The file with the second-latest calendar date is automatically parsed as the prior week reference, feeding Week-over-Week trend metrics.
+* **Zero Deletions Required**: Historical files can remain indefinitely in the repository without conflict.
+
+#### Mitigation for Concern C-5: Dynamic MDR Column Header Detection
+Document Control may introduce or remove columns between weekly revisions (for example, inserting a `FORECAST` column in 25-Sep-26, expanding the block size from 6 to 7 columns). To prevent hardcoded index errors, `update_analytics_data.py` and `update_mdr_data.py` dynamically scan Row 4/5 headers:
+```python
+def map_revision_columns(ws, start_row=4, end_row=6):
+    # Dynamically locates IFR, IFA, AFC, AP parent columns and child REBASELINE/PLAN columns
+    # Returns column index mapping dynamically adapted to any weekly sheet variation
+```
+
 
 ---
 

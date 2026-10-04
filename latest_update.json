@@ -1,18 +1,21 @@
 {
   "technical": {
-    "file": "ASK Technical Document Log Report - 18 Sep 26.xlsx",
-    "date": "18 Sep 26",
+    "file": "ASK Technical Document Log Report - 25 Sep 26.xlsx",
+    "date": "25 Sep 26",
     "status": "success"
   },
   "vendor": {
-    "file": "ASK Vendor Document Log Report - 18 Sep 26.xls",
-    "date": "18 Sep 26",
+    "file": "ASK Vendor Document Log Report - 25 Sep 26.xls",
+    "date": "25 Sep 26",
     "status": "success"
   },
   "mdr": {
-    "file": "MM-ASK-1A-GEN01-ENG-MDR-0001_B1- Cut off 18-Sep-26.xlsx",
-    "date": "18 Sep 26",
+    "file": "MM-ASK-1A-GEN01-ENG-MDR-0001_B1- Cut off 25-Sep-26.xlsx",
+    "date": "25 Sep 26",
     "status": "success"
   },
-  "updated_at": "2026-09-27T12:47:21.732246"
+  "analytics": {
+    "status": "success"
+  },
+  "updated_at": "2026-10-04T15:22:52.946737"
 }
